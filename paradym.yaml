@@ -30,11 +30,6 @@ tasks:
 
   # STANDALONE
   - action: download_github
-    src: https://github.com/dolutattoo/dolu_tool
-    ref: main
-    dest: ./resources/[tools]/dolu_tool
-
-  - action: download_github
     src: https://github.com/Scullyy/scully_emotemenu
     ref: main
     dest: ./resources/[tools]/scully_emotemenu
@@ -48,6 +43,13 @@ tasks:
     src: https://github.com/Concept-Collective/cc-chat
     ref: main
     dest: ./resources/[standalone]/cc-chat
+
+  - action: download_file
+    url: https://github.com/dolutattoo/dolu_tool/releases/latest/download/dolu_tool.zip
+    path: ./tmp/dolu_tool.zip
+  - action: unzip
+    src: ./tmp/dolu_tool.zip
+    dest: ./resources/[tools]
 
   - action: download_file
     url: https://github.com/thelindat/fivem-appearance/releases/latest/download/fivem-appearance.zip
