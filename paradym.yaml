@@ -22,46 +22,46 @@ tasks:
 
   - action: move_path
     src: ./tmp/paradym/chat
-    dest: ./resources/[srandalone]
+    dest: ./resources/[standalone]/chat
 
   - action: move_path
     src: ./tmp/paradym/prdm_scripts
-    dest: ./resources/[srandalone]
+    dest: ./resources/[standalone]/prdm_scripts
 
   # STANDALONE
   - action: download_github
     src: https://github.com/dolutattoo/dolu_tool
     ref: main
-    dest: ./resources/[tools]
+    dest: ./resources/[tools]/dolu_tool
 
   - action: download_github
     src: https://github.com/Scullyy/scully_emotemenu
     ref: main
-    dest: ./resources/[tools]
+    dest: ./resources/[tools]/scully_emotemenu
 
   - action: download_github
     src: https://github.com/Bob74/bob74_ipl
     ref: main
-    dest: ./resources/[srandalone]
+    dest: ./resources/[standalone]/bob74_ipl
 
   - action: download_github
     src: https://github.com/Concept-Collective/cc-chat
     ref: main
-    dest: ./resources/[srandalone]
+    dest: ./resources/[standalone]/cc-chat
 
   - action: download_file
     url: https://github.com/thelindat/fivem-appearance/releases/latest/download/fivem-appearance.zip
     path: ./tmp/fivem-appearance.zip
   - action: unzip
     src: ./tmp/fivem-appearance.zip
-    dest: ./resources/[srandalone]
+    dest: ./resources/[standalone]/fivem-appearance
 
   - action: download_file
     url: https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip
     path: ./tmp/ox_lib.zip
   - action: unzip
     src: ./tmp/ox_lib.zip
-    dest: ./resources/[srandalone]
+    dest: ./resources/[standalone]/ox_lib
 
     # Clean up
   - action: remove_path
