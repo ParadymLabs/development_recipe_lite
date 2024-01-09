@@ -61,7 +61,7 @@ tasks:
     path: ./tmp/ox_lib.zip
   - action: unzip
     src: ./tmp/ox_lib.zip
-    dest: ./resources/[standalone]/ox_lib
+    dest: ./resources/[standalone]
 
     # Clean up
   - action: remove_path
