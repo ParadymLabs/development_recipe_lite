@@ -20,9 +20,11 @@ tasks:
     src: ./tmp/paradym/Paradym.png
     dest: ./Paradym.png
 
-  - action: move_path
-    src: ./tmp/paradym/chat
-    dest: ./resources/[standalone]/chat
+  - action: download_github
+    src: https://github.com/citizenfx/cfx-server-data
+    ref: master
+    subpath: resources
+    dest: ./resources/[cfx-default]
 
   - action: move_path
     src: ./tmp/paradym/prdm_scripts
@@ -56,7 +58,7 @@ tasks:
     path: ./tmp/fivem-appearance.zip
   - action: unzip
     src: ./tmp/fivem-appearance.zip
-    dest: ./resources/[standalone]/fivem-appearance
+    dest: ./resources/[standalone]
 
   - action: download_file
     url: https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip
