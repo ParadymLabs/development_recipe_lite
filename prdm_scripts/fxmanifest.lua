@@ -8,12 +8,10 @@ version '0.1.0'
 description 'Simple scripts to improve quality of life for development'
 author 'i_Zolox'
 
-client_scripts {
-    'client/main.lua',
-    'client/*.lua',
+shared_scripts {
+    '@ox_lib/init.lua',
 }
 
-server_scripts {
-    'server/main.lua',
-    'server/*.lua',
+client_scripts {
+    'client/*.lua',
 }
