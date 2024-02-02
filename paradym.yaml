@@ -54,7 +54,7 @@ tasks:
     dest: ./resources/[tools]
 
   - action: download_file
-    url: https://github.com/thelindat/fivem-appearance/releases/latest/download/fivem-appearance.zip
+    url: https://github.com/thelindat/fivem-appearance/archive/refs/tags/v1.4.0.zip
     path: ./tmp/fivem-appearance.zip
   - action: unzip
     src: ./tmp/fivem-appearance.zip
