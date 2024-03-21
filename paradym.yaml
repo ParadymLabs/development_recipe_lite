@@ -67,7 +67,7 @@ tasks:
     src: ./tmp/ox_lib.zip
     dest: ./resources/[standalone]
 
-    - action: download_file
+  - action: download_file
     url: https://github.com/Renewed-Scripts/Renewed-Weathersync/releases/latest/download/Renewed-Weathersync.zip
     path: ./tmp/Renewed-Weathersync.zip
   - action: unzip
