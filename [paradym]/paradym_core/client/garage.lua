@@ -135,8 +135,10 @@ Garage.PromptDeleteVehicle = function(vehicleId)
     end
 end
 
-Garage.DeleteVehicles = function(vehicleId)
-    -- Do this
+Garage.DeleteVehicles = function(characterId)
+    if not GarageData.data.characters[characterId] then return end
+    GarageData.data.characters[characterId].vehicles = {}
+    GarageData:save(GarageData.data)
 end
 
 Garage.SpawnVehicle = function(vehicleId)

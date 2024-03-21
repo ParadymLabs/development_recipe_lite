@@ -294,6 +294,7 @@ Core.DeleteCharacter = function(characterId)
     PlayerData:save(PlayerData.data)
 
     Clothing.DeleteOutfits(characterId)
+    Garage.DeleteVehicles(characterId)
 end
 
 Core.Spawn = function(characterId)
