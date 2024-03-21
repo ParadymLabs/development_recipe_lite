@@ -81,6 +81,12 @@ Garage.SaveCurrentVehicle = function()
 
     GarageData.data.characters[characterId].vehicles = vehicles
     GarageData:save(GarageData.data)
+
+    lib.notify({
+        title = 'Garage',
+        description = ('%s has been saved successfully'):format(vehicleData.name),
+        type = 'success'
+    })
 end
 
 Garage.SelectVehicle = function(vehicleId)
