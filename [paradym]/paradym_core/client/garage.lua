@@ -84,6 +84,7 @@ Garage.SaveCurrentVehicle = function()
 
     lib.notify({
         title = 'Garage',
+        position = 'top',
         description = ('%s has been saved successfully'):format(vehicleData.name),
         type = 'success'
     })
