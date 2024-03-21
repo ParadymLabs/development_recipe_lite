@@ -49,7 +49,6 @@ Core.GetPlayerMetadata = function(index)
 end
 
 Core.SetCharacterMetadata = function(characterId, index, data)
-    print(PlayerData.data.characters[characterId])
     PlayerData.data.characters[characterId].metadata[index] = data
     PlayerData:save(PlayerData.data)
 end
@@ -347,6 +346,7 @@ Core.Logout = function()
 
     Core.CurrentCharacter = nil
     Core.LoggedOut = true
+    Utility.AllowResurrect = false
     Core.Init()
 end
 
@@ -412,6 +412,7 @@ Core.Init = function()
         Core.SetPosition(Core.DefaultSpawn.x, Core.DefaultSpawn.y, Core.DefaultSpawn.z, Core.DefaultSpawn.heading)
         Utils.DebugPrint('INFO', 'Spawning player model...')
         Core.SelectCharacter()
+        Utility.AllowResurrect = true
     else
         Utils.DebugPrint('INFO', 'Player already spawned, assuming resource restart...')
         local characterData = LocalPlayer.state.character

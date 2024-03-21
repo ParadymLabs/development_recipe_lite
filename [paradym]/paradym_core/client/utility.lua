@@ -2,8 +2,10 @@ Utility = {}
 
 Utility.AiEnabled = true
 Utility.Resurrecting = false
+Utility.AllowResurrect = true
 
 Utility.ResurrectPlayer = function()
+    if not Utility.AllowResurrect then return end
     Utility.Resurrecting = true
 
     lib.notify({
