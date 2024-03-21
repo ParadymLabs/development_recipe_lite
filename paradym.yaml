@@ -27,8 +27,8 @@ tasks:
     dest: ./resources/[cfx-default]
 
   - action: move_path
-    src: ./tmp/paradym/prdm_scripts
-    dest: ./resources/[standalone]/prdm_scripts
+    src: ./tmp/paradym/[paradym]
+    dest: ./resources/[paradym]
 
   # STANDALONE
   - action: download_github
@@ -67,6 +67,12 @@ tasks:
     src: ./tmp/ox_lib.zip
     dest: ./resources/[standalone]
 
+    - action: download_file
+    url: https://github.com/Renewed-Scripts/Renewed-Weathersync/releases/latest/download/Renewed-Weathersync.zip
+    path: ./tmp/Renewed-Weathersync.zip
+  - action: unzip
+    src: ./tmp/Renewed-Weathersync.zip
+    dest: ./resources/[standalone]
     # Clean up
   - action: remove_path
     path: ./tmp

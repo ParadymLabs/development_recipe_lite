@@ -1,0 +1,3 @@
+Settings = {}
+
+Settings.Debug = false
