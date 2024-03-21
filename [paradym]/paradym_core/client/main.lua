@@ -49,6 +49,7 @@ Core.GetPlayerMetadata = function(index)
 end
 
 Core.SetCharacterMetadata = function(characterId, index, data)
+    print(PlayerData.data.characters[characterId])
     PlayerData.data.characters[characterId].metadata[index] = data
     PlayerData:save(PlayerData.data)
 end
@@ -424,6 +425,7 @@ end
 
 if not PlayerData.data or not PlayerData.data.hasData then
     Utils.DebugPrint('WARN', 'No player data found, creating new data using defaults.')
+    LocalPlayer.state:set('spawned', false, true)
     Core.CreatePlayerData()
 end
 
