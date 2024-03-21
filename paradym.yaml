@@ -73,6 +73,6 @@ tasks:
   - action: unzip
     src: ./tmp/Renewed-Weathersync.zip
     dest: ./resources/[standalone]
-    # Clean up
+  # Clean up
   - action: remove_path
     path: ./tmp
