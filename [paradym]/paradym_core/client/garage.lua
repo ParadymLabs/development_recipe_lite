@@ -235,7 +235,7 @@ Garage.StoreVehicle = function()
         return
     end
 
-    if ownerData.owner ~= identifier then
+    if not (ownerData.owner == identifier) or not (ownerData.characterId == Core.CurrentCharacter) then
         lib.notify({
             title = 'Garage',
             position = 'top',
@@ -281,6 +281,7 @@ Garage.OpenGarageMenu = function()
     menu.options[#menu.options + 1] = {
         title = 'Store Vehicle',
         onSelect = function()
+            print('Hellllo')
             Garage.StoreVehicle()
         end,
         icon = 'warehouse'
