@@ -8,16 +8,20 @@ Commands.SpawnVehicle = function(source, model, coords, heading, warp)
     local data = Commands.VehicleData[model]
 
     local vehicle = CreateVehicleServerSetter(hash, data.type, coords.x, coords.y, coords.z, heading)
-    local startTime = os.time(os.date("!*t"))
 
-    while GetVehicleBodyHealth(vehicle) == 0 do
-        if (os.time(os.date("!*t")) - startTime) > 2.0 then break end
-        Wait(0)
+    repeat Wait(0) until GetVehicleBodyHealth(vehicle) > 0
+    
+    local success = lib.callback.await('paradym_core:initVehicle', source, NetworkGetNetworkIdFromEntity(vehicle))
+
+    if not success then
+        Utils.DebugPrint('ERROR', 'Failed to initialize vehicle')
     end
 
     if warp then
         SetPedIntoVehicle(GetPlayerPed(source), vehicle, -1)
     end
+
+    Utils.DebugPrint('INFO', 'Successfully spawned vehicle')
 
     return NetworkGetNetworkIdFromEntity(vehicle)
 end

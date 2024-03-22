@@ -20,6 +20,32 @@ Commands.ShowId = function()
     })
 end
 
+lib.callback.register('paradym_core:initVehicle', function(netId)
+    lib.waitFor(function()
+        local vehicle = NetToVeh(netId)
+        if DoesEntityExist(vehicle) then return true end
+        return false
+    end, 'Failed loading vehicle', 1000)
+
+    local vehicle = NetToVeh(netId)
+
+    lib.waitFor(function()
+        if NetworkGetEntityOwner(vehicle) == PlayerId() then return true end
+        return false
+    end, 'Failed loading vehicle', 1000)
+
+    if NetworkGetEntityOwner(vehicle) == PlayerId() then 
+        for i = -1, 9 do
+            local ped = GetPedInVehicleSeat(vehicle, i)
+            if ped ~= 0 then
+                DeleteEntity(ped)
+            end
+        end
+        return true
+    end
+    return false
+end)
+
 RegisterCommand('clothing', function(source, args, rawCommand)
     TriggerEvent('paradym_core:clothingMenu')
 end)
