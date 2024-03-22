@@ -25,6 +25,14 @@ Utility.ResurrectPlayer = function()
     end)
 end
 
+Utility.PauseRessuraction = function()
+    Utility.AllowResurrect = false
+    CreateThread(function()
+        Wait(1000)
+        Utility.AllowResurrect = true
+    end)
+end
+
 Utility.TaskAiThread = function()
     CreateThread(function()
         while not Utility.AiEnabled do
@@ -38,7 +46,7 @@ Utility.TaskAiThread = function()
                 pos['y'] + 500.0,
                 pos['z'] + 500.0
             )
-    
+
             SetPedDensityMultiplierThisFrame(0)
             SetVehicleDensityMultiplierThisFrame(0)
             SetRandomVehicleDensityMultiplierThisFrame(0)

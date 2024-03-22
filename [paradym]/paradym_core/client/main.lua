@@ -49,11 +49,15 @@ Core.GetPlayerMetadata = function(index)
 end
 
 Core.SetCharacterMetadata = function(characterId, index, data)
+    if not characterId then Utils.DebugPrint('ERROR', '[SetCharacterMetadata] No characterId, aborting metadata save') return end
     PlayerData.data.characters[characterId].metadata[index] = data
     PlayerData:save(PlayerData.data)
 end
 
 Core.GetCharacterMetadata = function(characterId, index)
+    if not PlayerData.data.characters[characterId] then
+        Utils.DebugPrint('ERROR', 'Metadata retrieval error: no character found with id: '..characterId) return
+    end
     return PlayerData.data.characters[characterId].metadata[index]
 end
 
@@ -150,6 +154,9 @@ Core.SelectCharacter = function()
 
     local characters = PlayerData.data.characters or {}
 
+    Utility.PauseRessuraction()
+    exports['fivem-appearance']:setPlayerModel('mp_m_freemode_01')
+
     menu.options[#menu.options + 1] = {
         title = 'Create Character',
         onSelect = function()
@@ -161,6 +168,8 @@ Core.SelectCharacter = function()
     for characterId, character in pairs(characters) do
         menu.options[#menu.options + 1] = {
             title = ('%s %s'):format(character.firstname, character.lastname),
+            icon = 'user',
+            iconColor = '#54e386',
             onSelect = function()
                 TriggerEvent('paradym_core:selectCharacter', characterId)
             end,
@@ -179,12 +188,18 @@ Core.SelectCharacter = function()
 end
 
 Core.SpawnCharacter = function(characterId)
+    local character = PlayerData.data.characters[characterId]
     local menu = {
         id = 'character_options',
-        title = 'Character Selection',
+        title = ('Character: %s %s'):format(character.firstname, character.lastname),
         canClose = false,
         options = {}
     }
+
+    local appearance = Core.GetCharacterMetadata(characterId, 'appearance')
+
+    Utility.PauseRessuraction()
+    exports['fivem-appearance']:setPlayerAppearance(appearance)
 
     menu.options[#menu.options + 1] = {
         title = 'Select Character',
@@ -200,7 +215,19 @@ Core.SpawnCharacter = function(characterId)
             Core.PromptDeleteCharacter(characterId)
         end,
         icon = 'trash',
+        iconColor = '#ff4f42',
     }
+
+    menu.options[#menu.options + 1] = {
+        title = 'Back',
+        onSelect = function()
+            Core.SelectCharacter()
+        end,
+        icon = 'arrow-left',
+    }
+
+    SetGameplayCamRelativeHeading(180.0)
+    SetGameplayCamRelativePitch(0.0, 1.0)
 
     lib.registerContext(menu)
     lib.showContext(menu.id)
@@ -245,6 +272,7 @@ Core.SelectDefaultCharacter = function()
     for characterId, character in pairs(characters) do
         menu.options[#menu.options + 1] = {
             title = ('%s %s'):format(character.firstname, character.lastname),
+            icon = 'user',
             onSelect = function()
                 Core.PromptDefaultOptions(characterId)
             end,
@@ -260,12 +288,13 @@ Core.SelectDefaultCharacter = function()
         onSelect = function()
             Core.SetDefaultCharacter(false)
         end,
-        icon = 'trash',
+        icon = 'xmark',
+        iconColor = '#ff4f42'
     }
 
     lib.registerContext(menu)
     lib.showContext(menu.id)
-end 
+end
 
 Core.PromptDeleteCharacter = function(characterId)
     local character = PlayerData.data.characters[characterId]
@@ -278,7 +307,7 @@ Core.PromptDeleteCharacter = function(characterId)
         centered = true,
         cancel = true
     })
-     
+
     local delete = alert == 'confirm' and true or false
 
     if delete then
@@ -298,6 +327,9 @@ Core.DeleteCharacter = function(characterId)
 end
 
 Core.Spawn = function(characterId)
+    local character = PlayerData.data.characters[characterId]
+    if not character then Utils.DebugPrint('ERROR', '[CRITITCAL] Missing character data, aborting spawn') return end
+
     if Core.GetCharacterMetadata(characterId, 'needAppearance') then
         local appearance = Clothing.OpenMenu()
 
@@ -309,6 +341,8 @@ Core.Spawn = function(characterId)
     Utils.DebugPrint('INFO', 'Spawning character...')
 
     local lastLocation = Core.GetCharacterMetadata(characterId, 'lastlocation')
+    lastLocation = lastLocation or Core.DefaultSpawn
+
     Core.SetPosition(lastLocation.x, lastLocation.y, lastLocation.z, lastLocation.heading)
 
     Core.CurrentCharacter = characterId
@@ -316,7 +350,7 @@ Core.Spawn = function(characterId)
 
     local characterData = {
         id = characterId,
-        data = PlayerData.data.characters[characterId],
+        data = character,
         player = {
             identifier = PlayerData.data.identifier,
         }
@@ -325,19 +359,33 @@ Core.Spawn = function(characterId)
     SetGameplayCamRelativeHeading(0.0)
     SetGameplayCamRelativePitch(-10.0, 1.0)
 
+    local appearance = Core.GetCharacterMetadata(characterId, 'appearance')
+
+    if appearance then
+        Utility.PauseRessuraction()
+        exports['fivem-appearance']:setPlayerAppearance(appearance)
+    end
+
+    lib.notify({
+        title = 'Character Selection',
+        position = 'top',
+        description = ('%s %s spawned. Welcome!'):format(character.firstname, character.lastname),
+        type = 'success'
+    })
+
     TriggerServerEvent('paradym_core:characterLogin', characterData)
 end
 
 Core.Logout = function()
     local coords = GetEntityCoords(cache.ped)
     local heading = GetEntityHeading(cache.ped)
-   
+
     Utils.DebugPrint('INFO', 'Logging out...')
     TriggerServerEvent('paradym_core:characterLogout')
-    
+
     LocalPlayer.state:set('spawned', false, true)
     LocalPlayer.state:set('character', nil, true)
-    
+
     Core.SetCharacterMetadata(Core.CurrentCharacter, 'lastlocation', {
         x = coords.x,
         y = coords.y,
@@ -345,9 +393,15 @@ Core.Logout = function()
         heading = heading
     })
 
+    lib.notify({
+        title = 'Character Selection',
+        position = 'top',
+        description = 'You have logged out',
+        type = 'success'
+    })
+
     Core.CurrentCharacter = nil
     Core.LoggedOut = true
-    Utility.AllowResurrect = false
     Core.Init()
 end
 
@@ -359,7 +413,7 @@ end
 Core.MainThread = function()
     CreateThread(function()
         while true do
-            
+
             SetPlayerWantedLevel(PlayerId(), 0, false)
 
             if IsPedUsingActionMode(cache.ped) then
@@ -379,7 +433,7 @@ Core.MainThread = function()
             if not Core.CurrentCharacter then goto continue end
 
             Core.UpdateCharacterLocation()
-            
+
             ::continue::
             Wait(5000)
         end
@@ -393,7 +447,6 @@ end
 Core.Init = function()
     if not LocalPlayer.state.spawned then
         ShutdownLoadingScreen()
-        exports['fivem-appearance']:setPlayerModel('mp_m_freemode_01')
 
         FreezeEntityPosition(cache.ped, true)
 
@@ -413,7 +466,6 @@ Core.Init = function()
         Core.SetPosition(Core.DefaultSpawn.x, Core.DefaultSpawn.y, Core.DefaultSpawn.z, Core.DefaultSpawn.heading)
         Utils.DebugPrint('INFO', 'Spawning player model...')
         Core.SelectCharacter()
-        Utility.AllowResurrect = true
     else
         Utils.DebugPrint('INFO', 'Player already spawned, assuming resource restart...')
         local characterData = LocalPlayer.state.character
@@ -464,6 +516,7 @@ end)
 Core.Init()
 Core.MainThread()
 
+RegisterNetEvent('paradym_core:resoleNilCharacter', Core.SelectCharacter)
 RegisterNetEvent('paradym_core:openCharacterCreation', Core.CreateCharacter)
 RegisterNetEvent('paradym_core:selectCharacter', Core.SpawnCharacter)
 RegisterNetEvent('paradym_core:toggleAI', Core.SetAIEnabled)

@@ -34,17 +34,96 @@ lib.callback.register('paradym_core:initVehicle', function(netId)
         return false
     end, 'Failed loading vehicle', 1000)
 
-    if NetworkGetEntityOwner(vehicle) == PlayerId() then 
+    if NetworkGetEntityOwner(vehicle) == PlayerId() then
         for i = -1, 9 do
             local ped = GetPedInVehicleSeat(vehicle, i)
             if ped ~= 0 then
                 DeleteEntity(ped)
             end
         end
+
         return true
     end
+
     return false
 end)
+
+Commands.ShowCommands = function()
+    local menu = {
+        id = 'commands_list',
+        title = 'Commands',
+        options = {}
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/clothing',
+        icon = 'terminal',
+        description = 'Open the clothing menu',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/outfits',
+        icon = 'terminal',
+        description = 'Open the outfits menu',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/garage',
+        icon = 'terminal',
+        description = 'Open the garage menu',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/impound',
+        icon = 'terminal',
+        description = 'Open the impound menu',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/savevehicle',
+        icon = 'terminal',
+        description = 'Save the current vehicle',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/logout',
+        icon = 'terminal',
+        description = 'Logout of the current character',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/revive',
+        icon = 'terminal',
+        description = 'Revive your character',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/car',
+        icon = 'terminal',
+        description = 'Spawn a car',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/myid',
+        icon = 'terminal',
+        description = 'Show your server ID',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/defaultchar',
+        icon = 'terminal',
+        description = 'Select the default character',
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = '/help',
+        icon = 'terminal',
+        description = 'Show this list of commands',
+    }
+
+    lib.registerContext(menu)
+    lib.showContext(menu.id)
+end
 
 RegisterCommand('clothing', function(source, args, rawCommand)
     TriggerEvent('paradym_core:clothingMenu')
@@ -101,3 +180,9 @@ end)
 RegisterCommand('parsevehicles', function(source, args, raw)
     VehicleParser.SaveVehicleData()
 end)
+
+RegisterCommand('help', function(source, args, raw)
+    Commands.ShowCommands()
+end)
+
+TriggerEvent('chat:addSuggestion', '/help', 'Shows a list of available commands')

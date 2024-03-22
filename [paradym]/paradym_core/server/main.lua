@@ -13,6 +13,7 @@ end
 
 Core.CharacterLogout = function(source)
     local characterData = Core.Characters[source]
+    if not characterData then TriggerClientEvent('paradym_core:resoleNilCharacter', source) return end
     Utils.DebugPrint('INFO', ('Character logout with data: source: %s name: %s %s'):format(source, characterData.data.firstname, characterData.data.lastname))
     Utils.DebugPrint('INFO', ('Player data: identifier: %s'):format(characterData.player.identifier))
     Player(source).state:set('character', nil, true)

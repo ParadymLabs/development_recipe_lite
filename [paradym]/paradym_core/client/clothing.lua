@@ -46,6 +46,15 @@ Clothing.StartCustomization = function()
     return finalAppearance
 end
 
+Clothing.UpdateCharacterAppearance = function()
+    if not Core.CurrentCharacter then return end
+
+    local appearance = Clothing.StartCustomization()
+    if not appearance then return end
+
+    Core.SetCharacterAppearance(Core.CurrentCharacter, appearance)
+end
+
 Clothing.GetOutfits = function()
     if not ClothingData.data.characters[Core.CurrentCharacter] then
         ClothingData.data.characters[Core.CurrentCharacter] = {
@@ -60,7 +69,7 @@ Clothing.OpenOutfitMenu = function()
     if not Core.CurrentCharacter then return end
 
     local outfits = Clothing.GetOutfits()
-    
+
     local menu = {
         id = 'outfit_menu',
         title = 'Character Outfits',
@@ -81,7 +90,8 @@ Clothing.OpenOutfitMenu = function()
             onSelect = function()
                 Clothing.SelectOutfit(outfitId)
             end,
-            icon = 'shirt'
+            icon = 'shirt',
+            iconColor = '#6593c7'
         }
     end
 
@@ -121,22 +131,32 @@ Clothing.SelectOutfit = function(outfitId)
     local menu = {
         id = 'outfit_menu',
         title = 'Character Outfits',
-        options = {
-            {
-                title = 'Wear Outfit',
-                onSelect = function()
-                    Clothing.UseOutfit(outfitId)
-                end,
-                icon = 'shirt'
-            },
-            {
-                title = 'Delete Outfit',
-                onSelect = function()
-                    Clothing.PromptDeleteOutfit(outfitId)
-                end,
-                icon = 'trash'
-            }
-        }
+        options = {}
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = 'Wear Outfit',
+        onSelect = function()
+            Clothing.UseOutfit(outfitId)
+        end,
+        icon = 'check'
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = 'Delete Outfit',
+        onSelect = function()
+            Clothing.PromptDeleteOutfit(outfitId)
+        end,
+        icon = 'xmark',
+        iconColor = '#ff4f42'
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = 'Back',
+        onSelect = function()
+            Clothing.OpenOutfitMenu()
+        end,
+        icon = 'arrow-left',
     }
 
     lib.registerContext(menu)
@@ -146,7 +166,8 @@ end
 Clothing.UseOutfit = function(outfitId)
     local outfit = Clothing.GetOutfits()[outfitId]
     if not outfit or not outfit.appearance then return end
-   
+
+    Utility.PauseRessuraction()
     Core.SetCharacterAppearance(Core.CurrentCharacter, outfit.appearance)
     exports['fivem-appearance']:setPlayerAppearance(outfit.appearance)
 
@@ -171,7 +192,7 @@ Clothing.PromptDeleteOutfit = function(outfitId)
         centered = true,
         cancel = true
     })
-     
+
     local delete = alert == 'confirm' and true or false
 
     if delete then
@@ -201,5 +222,5 @@ if not ClothingData.data or not ClothingData.data.hasData then
     Clothing.CreateClothingData()
 end
 
-RegisterNetEvent('paradym_core:clothingMenu', Clothing.StartCustomization)
+RegisterNetEvent('paradym_core:clothingMenu', Clothing.UpdateCharacterAppearance)
 RegisterNetEvent('paradym_core:outfits', Clothing.OpenOutfitMenu)

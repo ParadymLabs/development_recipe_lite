@@ -59,6 +59,8 @@ Garage.SaveCurrentVehicle = function()
     local props = Garage.GetVehicleProperties()
     if not props then return end
 
+    local plate = GetVehicleNumberPlateText(vehicle)
+
     local input = lib.inputDialog('Save Vehicle', {
         {type = 'input', label = 'Vehicle Name', required = true, min = 2},
     })
@@ -72,6 +74,7 @@ Garage.SaveCurrentVehicle = function()
     local vehicleData = {
         name = input[1],
         model = GetEntityModel(vehicle),
+        plate = plate,
         props = props,
         stored = true
     }
@@ -85,9 +88,11 @@ Garage.SaveCurrentVehicle = function()
     lib.notify({
         title = 'Garage',
         position = 'top',
-        description = ('%s has been saved successfully'):format(vehicleData.name),
+        description = ('Vehicle "%s" has been saved successfully'):format(vehicleData.name),
         type = 'success'
     })
+
+    DeleteEntity(vehicle)
 end
 
 Garage.SelectVehicle = function(vehicleId)
@@ -102,7 +107,7 @@ Garage.SelectVehicle = function(vehicleId)
         onSelect = function()
             Garage.SpawnVehicle(vehicleId)
         end,
-        icon = 'car'
+        icon = 'check'
     }
 
     menu.options[#menu.options + 1] = {
@@ -110,7 +115,16 @@ Garage.SelectVehicle = function(vehicleId)
         onSelect = function()
             Garage.PromptDeleteVehicle(vehicleId)
         end,
-        icon = 'edit'
+        icon = 'xmark',
+        iconColor = '#ff4f42'
+    }
+
+    menu.options[#menu.options + 1] = {
+        title = 'Back',
+        onSelect = function()
+            Garage.OpenGarageMenu()
+        end,
+        icon = 'arrow-left',
     }
 
     lib.registerContext(menu)
@@ -130,12 +144,20 @@ Garage.PromptDeleteVehicle = function(vehicleId)
         centered = true,
         cancel = true
     })
-     
+
     local delete = alert == 'confirm' and true or false
 
     if delete then
         Garage.GetVehicles()[vehicleId] = nil
         GarageData:save(GarageData.data)
+
+        lib.notify({
+            title = 'Garage',
+            position = 'top',
+            description = ('Vehicle "%s" has been deleted successfully'):format(vehicle.name),
+            type = 'success'
+        })
+
         Garage.OpenGarageMenu()
     else
         Garage.OpenGarageMenu()
@@ -181,14 +203,19 @@ Garage.SpawnVehicle = function(vehicleId)
     GarageData.data.characters[Core.CurrentCharacter].vehicles = vehicles
     GarageData:save(GarageData.data)
 
+    local plate = vehicleData.plate
+    if plate then SetVehicleNumberPlateText(vehicle, plate) end
+
     Garage.SetVehicleProperies(vehicle, vehicleData.props, false)
 
-    lib.notify {
+    Utils.DebugPrint('INFO', ('Vehicle with plate %s has been spawned successfully'):format(vehicleData.plate))
+
+    lib.notify({
         title = 'Garage',
         position = 'top',
-        description = ('%s has been retrieved'):format(vehicleData.name),
+        description = ('Vehicle "%s" has been deleted successfully'):format(vehicleData.name),
         type = 'success'
-    }
+    })
 end
 
 Garage.StoreVehicle = function()
@@ -230,12 +257,12 @@ Garage.StoreVehicle = function()
     GarageData.data.characters[Core.CurrentCharacter].vehicles[ownerData.vehicleId] = vehicleData
     GarageData:save(GarageData.data)
 
-    lib.notify {
+    lib.notify({
         title = 'Garage',
         position = 'top',
-        description = ('%s has been stored successfully'):format(vehicleData.name),
+        description = ('Vehicle "%s" has been stored successfully'):format(vehicleData.name),
         type = 'success'
-    }
+    })
 
     DeleteEntity(vehicle)
 end
@@ -244,7 +271,7 @@ Garage.OpenGarageMenu = function()
     if not Core.CurrentCharacter then return end
 
     local vehicles = Garage.GetVehicles()
-    
+
     local menu = {
         id = 'garage_menu',
         title = 'Garage',
@@ -256,16 +283,17 @@ Garage.OpenGarageMenu = function()
         onSelect = function()
             Garage.StoreVehicle()
         end,
-        icon = 'plus'
+        icon = 'warehouse'
     }
 
     for vehicleId, vehicle in pairs(vehicles) do
         menu.options[#menu.options + 1] = {
-            title = vehicle.name,
+            title = ('%s (%s) - %s'):format(vehicle.name, vehicle.plate or 'No Plate', Garage.VehicleModels[vehicle.model].name),
             onSelect = function()
                 Garage.SelectVehicle(vehicleId)
             end,
-            icon = 'car'
+            icon = 'car',
+            iconColor = vehicle.stored and '#6593c7' or '#e35454'
         }
     end
 
@@ -296,14 +324,12 @@ Impound.ClaimVehicle = function (vehicleId)
     GarageData.data.characters[Core.CurrentCharacter].vehicles = vehicles
     GarageData:save(GarageData.data)
 
-    lib.notify {
+    lib.notify({
         title = 'Garage',
         position = 'top',
-        description = ('%s has been claimed successfully'):format(vehicles[vehicleId].name),
+        description = ('Vehicle "%s" has been claimed successfully'):format(vehicles[vehicleId].name),
         type = 'success'
-    }
-
-    Impound.OpenImpoundMenu()
+    })
 end
 
 Impound.ImpoundOptions = function(vehicleId)
@@ -318,7 +344,7 @@ Impound.ImpoundOptions = function(vehicleId)
         onSelect = function()
             Impound.ClaimVehicle(vehicleId)
         end,
-        icon = 'car'
+        icon = 'clipboard'
     }
 
     menu.options[#menu.options + 1] = {
@@ -337,7 +363,7 @@ Impound.OpenImpoundMenu = function()
     if not Core.CurrentCharacter then return end
 
     local vehicles = Garage.GetVehicles()
-    
+
     local menu = {
         id = 'impound_menu',
         title = 'Impound Lot',
@@ -347,11 +373,12 @@ Impound.OpenImpoundMenu = function()
     for vehicleId, vehicle in pairs(vehicles) do
         if not vehicle.stored then
             menu.options[#menu.options + 1] = {
-                title = vehicle.name,
+                title = ('%s (%s) - %s'):format(vehicle.name, vehicle.plate or 'No Plate', Garage.VehicleModels[vehicle.model].name),
                 onSelect = function()
                     Impound.ImpoundOptions(vehicleId)
                 end,
-                icon = 'car'
+                icon = 'car',
+                iconColor = '#2aa5b8'
             }
         end
     end

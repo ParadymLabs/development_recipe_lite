@@ -1,6 +1,6 @@
 return {
     `shamal`,
-    `luxor`, 
+    `luxor`,
     `luxor2`,
     `jet`,
     `lazer`,

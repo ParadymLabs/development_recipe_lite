@@ -10,7 +10,7 @@ Commands.SpawnVehicle = function(source, model, coords, heading, warp)
     local vehicle = CreateVehicleServerSetter(hash, data.type, coords.x, coords.y, coords.z, heading)
 
     repeat Wait(0) until GetVehicleBodyHealth(vehicle) > 0
-    
+
     local success = lib.callback.await('paradym_core:initVehicle', source, NetworkGetNetworkIdFromEntity(vehicle))
 
     if not success then
@@ -20,8 +20,6 @@ Commands.SpawnVehicle = function(source, model, coords, heading, warp)
     if warp then
         SetPedIntoVehicle(GetPlayerPed(source), vehicle, -1)
     end
-
-    Utils.DebugPrint('INFO', 'Successfully spawned vehicle')
 
     return NetworkGetNetworkIdFromEntity(vehicle)
 end
@@ -86,11 +84,6 @@ end)
 
 lib.callback.register('paradym_core:spawnVehicle', function(source, model, coords, heading, warp)
     return Commands.SpawnVehicle(source, model, coords, heading, warp)
-end)
-
-RegisterNetEvent('paradym_core:spawnVehicle', function(model, coords, heading, warp)
-    local source = source
-    Commands.SpawnVehicle(source, model, coords, heading, warp)
 end)
 
 RegisterNetEvent('paradym_core:teleportToPlayer', function(targetId)
