@@ -40,6 +40,7 @@ Core.SetPosition = function(x, y, z, heading)
 end
 
 Core.SetPlayerMetadata = function(index, data)
+    if not PlayerData.data.metadata then return end
     PlayerData.data.metadata[index] = data
     PlayerData:save(PlayerData.data)
 end
@@ -49,7 +50,7 @@ Core.GetPlayerMetadata = function(index)
 end
 
 Core.SetCharacterMetadata = function(characterId, index, data)
-    if not characterId then Utils.DebugPrint('ERROR', '[SetCharacterMetadata] No characterId, aborting metadata save') return end
+    if not PlayerData.data.characters[characterId] or not PlayerData.data.characters[characterId].metadata then return end
     PlayerData.data.characters[characterId].metadata[index] = data
     PlayerData:save(PlayerData.data)
 end
@@ -75,6 +76,8 @@ Core.SetDefaultCharacter = function(characterId)
 end
 
 Core.UpdateCharacterLocation = function()
+    if not Core.CurrentCharacter then return end
+
     local coords = GetEntityCoords(cache.ped)
     local heading = GetEntityHeading(cache.ped)
 
@@ -171,12 +174,18 @@ Core.SelectCharacter = function()
             icon = 'user',
             iconColor = '#54e386',
             onSelect = function()
-                TriggerEvent('paradym_core:selectCharacter', characterId)
+                Core.SpawnCharacter(characterId)
             end,
             metadata = {
                 {label = 'Cash', value = character.cash or 0},
                 {label = 'Bank', value = character.bank or 0},
             },
+        }
+    end
+
+    if #menu.options == 1 then
+        menu.options[#menu.options + 1] = {
+            title = 'Create your first character!',
         }
     end
 
@@ -311,7 +320,13 @@ Core.PromptDeleteCharacter = function(characterId)
     local delete = alert == 'confirm' and true or false
 
     if delete then
-        Core.DeleteCharacter(characterId)
+        local input = lib.inputDialog('Confirmation', {
+            {type = 'input', label = 'Type "CONFIRM" to confirm chaeacter deletion', required = true, placeholder = 'CONFIRM'},
+        })
+
+        if input and input[1] == 'CONFIRM' then
+            Core.DeleteCharacter(characterId)
+        end
         Core.SelectCharacter()
     else
         Core.SelectCharacter()
@@ -319,8 +334,18 @@ Core.PromptDeleteCharacter = function(characterId)
 end
 
 Core.DeleteCharacter = function(characterId)
-    PlayerData.data.characters[characterId] = nil
+    local characters = PlayerData.data.characters
+    characters[characterId] = nil
+
+    PlayerData.data.characters = characters
     PlayerData:save(PlayerData.data)
+
+    lib.notify({
+        title = 'Character Deletion',
+        description = 'Character has been deleted',
+        type = 'success',
+        position = 'top'
+    })
 
     Clothing.DeleteOutfits(characterId)
     Garage.DeleteVehicles(characterId)
@@ -444,6 +469,31 @@ Core.MainThread = function()
     ShutdownLoadingScreen()
 end
 
+Core.ResetAll = function()
+    SetResourceKvp('player_data', '')
+    SetResourceKvp('clothing_data', '')
+    SetResourceKvp('garage_data', '')
+
+    PlayerData.data = {}
+    Core.CreatePlayerData()
+    Utils.DebugPrint('WARN', 'Player data has been reset.')
+
+    Clothing.ResetAll()
+    Garage.ResetAll()
+
+    LocalPlayer.state:set('spawned', false, true)
+    LocalPlayer.state:set('character', nil, true)
+
+    lib.notify({
+        title = 'Reset',
+        description = 'All player data has been reset',
+        type = 'warning',
+        position = 'top'
+    })
+
+    Core.Init()
+end
+
 Core.Init = function()
     if not LocalPlayer.state.spawned then
         ShutdownLoadingScreen()
@@ -518,5 +568,4 @@ Core.MainThread()
 
 RegisterNetEvent('paradym_core:resoleNilCharacter', Core.SelectCharacter)
 RegisterNetEvent('paradym_core:openCharacterCreation', Core.CreateCharacter)
-RegisterNetEvent('paradym_core:selectCharacter', Core.SpawnCharacter)
 RegisterNetEvent('paradym_core:toggleAI', Core.SetAIEnabled)

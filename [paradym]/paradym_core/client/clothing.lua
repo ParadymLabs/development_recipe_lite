@@ -95,6 +95,12 @@ Clothing.OpenOutfitMenu = function()
         }
     end
 
+    if #menu.options == 1 then
+        menu.options[#menu.options + 1] = {
+            title = 'No Outfits',
+        }
+    end
+
     lib.registerContext(menu)
     lib.showContext(menu.id)
 end
@@ -215,6 +221,12 @@ Clothing.DeleteOutfits = function(characterId)
     if not ClothingData.data.characters[characterId] then return end
     ClothingData.data.characters[characterId].outfits = {}
     ClothingData:save(ClothingData.data)
+end
+
+Clothing.ResetAll = function()
+    ClothingData.data = {}
+    Clothing.CreateClothingData()
+    Utils.DebugPrint('WARN', 'Clothing data has been reset.')
 end
 
 if not ClothingData.data or not ClothingData.data.hasData then

@@ -281,7 +281,6 @@ Garage.OpenGarageMenu = function()
     menu.options[#menu.options + 1] = {
         title = 'Store Vehicle',
         onSelect = function()
-            print('Hellllo')
             Garage.StoreVehicle()
         end,
         icon = 'warehouse'
@@ -295,6 +294,12 @@ Garage.OpenGarageMenu = function()
             end,
             icon = 'car',
             iconColor = vehicle.stored and '#6593c7' or '#e35454'
+        }
+    end
+
+    if #menu.options == 1 then
+        menu.options[#menu.options + 1] = {
+            title = 'No Vehicles',
         }
     end
 
@@ -384,11 +389,23 @@ Impound.OpenImpoundMenu = function()
         end
     end
 
+    if #menu.options == 0 then
+        menu.options[#menu.options + 1] = {
+            title = 'No Vehicles in Impound',
+        }
+    end
+
     lib.registerContext(menu)
     lib.showContext(menu.id)
 end
 
+Garage.ResetAll = function()
+    GarageData.data = {}
+    Garage.CreateGarageData()
+    Utils.DebugPrint('WARN', 'Garage data has been reset.')
+end
+
 if not GarageData.data or not GarageData.data.hasData then
-    Utils.DebugPrint('INFO', 'Initializing player garage datastore.')
+    Utils.DebugPrint('WARN', 'Initializing player garage datastore.')
     Garage.CreateGarageData()
 end

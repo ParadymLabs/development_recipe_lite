@@ -6,6 +6,13 @@ Utility.AllowResurrect = true
 
 Utility.ResurrectPlayer = function()
     if not Utility.AllowResurrect then return end
+
+    Wait(100)
+
+    if GetEntityHealth(cache.ped) > 0 then
+        return
+    end
+
     Utility.Resurrecting = true
 
     lib.notify({
@@ -28,7 +35,7 @@ end
 Utility.PauseRessuraction = function()
     Utility.AllowResurrect = false
     CreateThread(function()
-        Wait(1000)
+        Wait(2000)
         Utility.AllowResurrect = true
     end)
 end

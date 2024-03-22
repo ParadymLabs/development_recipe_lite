@@ -20,34 +20,6 @@ Commands.ShowId = function()
     })
 end
 
-lib.callback.register('paradym_core:initVehicle', function(netId)
-    lib.waitFor(function()
-        local vehicle = NetToVeh(netId)
-        if DoesEntityExist(vehicle) then return true end
-        return false
-    end, 'Failed loading vehicle', 1000)
-
-    local vehicle = NetToVeh(netId)
-
-    lib.waitFor(function()
-        if NetworkGetEntityOwner(vehicle) == PlayerId() then return true end
-        return false
-    end, 'Failed loading vehicle', 1000)
-
-    if NetworkGetEntityOwner(vehicle) == PlayerId() then
-        for i = -1, 9 do
-            local ped = GetPedInVehicleSeat(vehicle, i)
-            if ped ~= 0 then
-                DeleteEntity(ped)
-            end
-        end
-
-        return true
-    end
-
-    return false
-end)
-
 Commands.ShowCommands = function()
     local menu = {
         id = 'commands_list',
@@ -125,6 +97,58 @@ Commands.ShowCommands = function()
     lib.showContext(menu.id)
 end
 
+Commands.ResetAll = function()
+    local alert = lib.alertDialog({
+        header = 'Data Reset',
+        content = 'Are you sure you want to delete all your data? This cannot be undone.',
+        labels = {
+            confirm = 'DELETE ALL DATA!',
+        },
+        centered = true,
+        cancel = true
+    })
+
+    local delete = alert == 'confirm' and true or false
+
+    if delete then
+        local input = lib.inputDialog('Confirmation', {
+            {type = 'input', label = 'Type \'CONFIRM\' to confirm data reset', required = true, placeholder = 'CONFIRM'},
+        })
+
+        if input and input[1] == 'CONFIRM' then
+            Core.ResetAll()
+        end
+    end
+end
+
+lib.callback.register('paradym_core:initVehicle', function(netId)
+    lib.waitFor(function()
+        local vehicle = NetToVeh(netId)
+        if DoesEntityExist(vehicle) then return true end
+        return false
+    end, 'Failed loading vehicle', 1000)
+
+    local vehicle = NetToVeh(netId)
+
+    lib.waitFor(function()
+        if NetworkGetEntityOwner(vehicle) == PlayerId() then return true end
+        return false
+    end, 'Failed loading vehicle', 1000)
+
+    if NetworkGetEntityOwner(vehicle) == PlayerId() then
+        for i = -1, 9 do
+            local ped = GetPedInVehicleSeat(vehicle, i)
+            if ped ~= 0 then
+                DeleteEntity(ped)
+            end
+        end
+
+        return true
+    end
+
+    return false
+end)
+
 RegisterCommand('clothing', function(source, args, rawCommand)
     TriggerEvent('paradym_core:clothingMenu')
 end)
@@ -183,6 +207,10 @@ end)
 
 RegisterCommand('help', function(source, args, raw)
     Commands.ShowCommands()
+end)
+
+RegisterCommand('resetall', function(source, args, raw)
+    Commands.ResetAll()
 end)
 
 TriggerEvent('chat:addSuggestion', '/help', 'Shows a list of available commands')

@@ -1,3 +1,3 @@
 Settings = {}
 
-Settings.Debug = false
+-- For settings n' stuff
