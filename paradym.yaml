@@ -73,6 +73,14 @@ tasks:
   - action: unzip
     src: ./tmp/Renewed-Weathersync.zip
     dest: ./resources/[standalone]
+
+    - action: download_file
+    url: https://github.com/ParadymLabs/lite-core/releases/latest/download/lite-core.zip
+    path: ./tmp/lite-core.zip
+  - action: unzip
+    src: ./tmp/lite-core.zip
+    dest: ./resources/[standalone]
+
   # Clean up
   - action: remove_path
     path: ./tmp
