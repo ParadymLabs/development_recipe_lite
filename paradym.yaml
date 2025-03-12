@@ -1,9 +1,8 @@
-$engine: 3
-$onesync: on
 name: ParadymLabs Development Server (lite)
-version: 1.0.0
+version: 1.0.1
 author: ParadymLabs Team
 description: An improved simple, lightweight development server recipe for TxAdmin.
+$onesync: on
 
 tasks:
   #  Download Base Files
