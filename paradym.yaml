@@ -11,7 +11,7 @@ tasks:
     src: https://github.com/ParadymHub/paradym_recipe
     ref: main
     dest: ./tmp/paradym
-
+    
   - action: move_path
     src: ./tmp/paradym/server.cfg
     dest: ./server.cfg
@@ -25,10 +25,9 @@ tasks:
     ref: master
     subpath: resources
     dest: ./resources/[cfx-default]
-
-  - action: move_path
-    src: ./tmp/paradym/[paradym]
-    dest: ./resources/[paradym]
+    
+  - action: ensure_dir
+    path: ./resources/[prdm]
 
   # STANDALONE
   - action: download_github
